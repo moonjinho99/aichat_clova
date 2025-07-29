@@ -1,14 +1,12 @@
 package com.example.aichat.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-
+import org.springframework.web.bind.annotation.RequestBody;
 import com.example.aichat.dto.ChatRequestDto;
 import com.example.aichat.service.AiService;
-
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -24,12 +22,8 @@ public class AiController {
 	}
 	
 	@PostMapping("/chat")
-	public String chat(@ModelAttribute ChatRequestDto request, Model model) {
-		String result = aiService.askAsJavaInstructor(request.getPrompt());
-		model.addAttribute("response",result);
-		model.addAttribute("prompt",request.getPrompt());
-		
-		return "chat";
+	public ResponseEntity<?> chat(@RequestBody ChatRequestDto request) {			
+		return aiService.askAsJavaInstructor(request.getPrompt(), request.getType());
 	}
 
 }

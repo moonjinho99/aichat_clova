@@ -2,18 +2,18 @@ package com.example.aichat.service;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.aichat.dto.ChatResponseDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -29,8 +29,11 @@ public class AiService {
     @Value("${clova.api.key}")
     private String apiKey;
 
-    @Value("${clova.model.prompt}")
-    private String systemPrompt;
+    @Value("${clova.model.prompt.java}")
+    private String javaPrompt;
+    
+    @Value("${clova.model.prompt.python}")
+    private String pythonPrompt;
 
     @Value("${clova.model.max-tokens}")
     private int maxTokens;
@@ -41,7 +44,7 @@ public class AiService {
     @Value("${clova.model.top-p}")
     private double topP;
 
-    public String askAsJavaInstructor(String userPrompt) {
+    public ResponseEntity<?> askAsJavaInstructor(String userPrompt, String type) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         //headers.set("X-NCP-CLOVASTUDIO-API-KEY", apiKey);
@@ -50,10 +53,23 @@ public class AiService {
         
         
         Map<String, Object> body = new HashMap<>();
-        body.put("messages", new Object[] {
-                Map.of("role", "system", "content", systemPrompt),
-                Map.of("role", "user", "content", userPrompt)
-        });
+        
+        if(type.equals("JAVA"))
+        {
+        	body.put("messages", new Object[] {
+            		Map.of("role", "system", "content", javaPrompt),
+                    Map.of("role", "user", "content", userPrompt)
+            });
+        }
+        
+        if(type.equals("PYTHON"))
+        {
+        	body.put("messages", new Object[] {
+            		Map.of("role", "system", "content", pythonPrompt),
+                    Map.of("role", "user", "content", userPrompt)
+            });
+        }
+              
         body.put("topP", topP);
         body.put("temperature", temperature);
         body.put("maxTokens", maxTokens);
@@ -65,9 +81,11 @@ public class AiService {
             ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
             JsonNode root = objectMapper.readTree(response.getBody());
             String answer = root.path("result").path("message").path("content").asText();
-            return answer;
+            ChatResponseDto ChatResponse = new ChatResponseDto(answer);    
+            
+            return ResponseEntity.ok(ChatResponse);
         } catch (Exception e) {
-            return "AI 응답 처리 중 오류 발생: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message","AI 응답 처리 중 오류 발생: " + e.getMessage()));
         }
     }
 }

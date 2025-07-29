@@ -11,15 +11,35 @@
     </style>
 </head>
 <body>
-    <h2>🧑‍🏫 Java 강사 챗봇</h2>
-    <form method="post" th:action="@{/chat}" th:object="${chatRequestDto}">
-        <input type="text" name="prompt" placeholder="질문을 입력하세요..." th:value="${prompt}">
-        <button type="submit">질문하기</button>
-    </form>
+    <h2>🧑‍🏫 강사 선택 챗봇</h2>
 
-    <div class="response" th:if="${response}">
-        <strong>💬 챗봇 응답:</strong><br/>
-        <span th:text="${response}"></span>
-    </div>
+    <select id="type">
+        <option value="JAVA">Java 강사</option>
+        <option value="PYTHON">Python 강사</option>
+    </select>
+    <input type="text" id="prompt" placeholder="질문을 입력하세요..." />
+    <button onclick="sendPrompt()">질문하기</button>
+
+    <div class="response" id="ChatResponse"></div>
+
+    <script>
+        function sendPrompt() {
+            const prompt = document.getElementById("prompt").value;
+            const type = document.getElementById("type").value;
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt, type })
+            })
+            .then(response => response.json())
+            .then(data => {    
+                document.getElementById("ChatResponse").innerText = data.response;
+            })
+            .catch(err => console.error("에러 발생:", err));
+        }
+    </script>
 </body>
 </html>
