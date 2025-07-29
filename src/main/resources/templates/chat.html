@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Java 강사 챗봇</title>
+    <style>
+        body { font-family: Arial; margin: 2rem; }
+        textarea, input[type=text] { width: 100%; padding: 10px; margin-top: 10px; }
+        button { padding: 10px 20px; margin-top: 10px; }
+        .response { background-color: #f4f4f4; padding: 1rem; margin-top: 1rem; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h2>🧑‍🏫 Java 강사 챗봇</h2>
+    <form method="post" th:action="@{/chat}" th:object="${chatRequestDto}">
+        <input type="text" name="prompt" placeholder="질문을 입력하세요..." th:value="${prompt}">
+        <button type="submit">질문하기</button>
+    </form>
+
+    <div class="response" th:if="${response}">
+        <strong>💬 챗봇 응답:</strong><br/>
+        <span th:text="${response}"></span>
+    </div>
+</body>
+</html>
